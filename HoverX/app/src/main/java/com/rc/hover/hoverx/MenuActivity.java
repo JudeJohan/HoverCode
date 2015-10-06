@@ -18,7 +18,7 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        Button connect = (Button) findViewById(R.id.connect_button);
+        final Button connect = (Button) findViewById(R.id.connect_button);
         final Button drive = (Button) findViewById(R.id.drive_button);
         drive.setEnabled(false);
         final TextView connect_status = (TextView) findViewById(R.id.connect_text);
@@ -26,9 +26,20 @@ public class MenuActivity extends AppCompatActivity {
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               connect_status.setText("Connected!");
-                connect_status.setTextColor(getResources().getColor(R.color.LIME));
-                drive.setEnabled(true);
+                if(connect.getText() == getResources().getString(R.string.connect_button))
+                {
+                    connect_status.setText(R.string.connection_status_con);
+                    connect.setText(R.string.disconnect_button);
+                    connect_status.setTextColor(getResources().getColor(R.color.LIME));
+                    drive.setEnabled(true);
+                }
+                else if(connect.getText() ==  getResources().getString(R.string.disconnect_button))
+                {
+                    connect_status.setText(R.string.connection_status);
+                    connect.setText(R.string.connect_button);
+                    connect_status.setTextColor(getResources().getColor(R.color.RED));
+                    drive.setEnabled(false);
+                }
             }
         });
 

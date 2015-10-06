@@ -1,5 +1,6 @@
 package com.rc.hover.hoverx;
 
+import android.app.ActionBar;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash_activity);
+
+        //getActionBar().hide();
+
         Thread splash_timer = new Thread(){
             public void run(){
                 try{
