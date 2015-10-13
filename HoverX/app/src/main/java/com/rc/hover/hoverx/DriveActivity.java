@@ -25,8 +25,6 @@ public class DriveActivity extends AppCompatActivity {
         tx2 = (TextView)findViewById(R.id.textView2);
         tx1.setText("Current value: " + vsb1.getProgress());
         tx2.setText("Current value: " + vsb2.getProgress());
-        //vsb1.setProgressAndThumb(50);
-        //vsb2.setProgressAndThumb(50);
 
         vsb1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
