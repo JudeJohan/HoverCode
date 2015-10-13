@@ -3,6 +3,7 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+<<<<<<< HEAD
     <com.rc.hover.hoverx.VerticalSeekBar
         android:layout_width="50dp"
         android:layout_height="fill_parent"
@@ -39,4 +40,6 @@
         android:layout_toLeftOf="@+id/seekBar2"
         android:layout_toStartOf="@+id/seekBar2" />
 
+=======
+>>>>>>> parent of 3c1cd6e... added vertical seekbars for drive view
 </RelativeLayout>
