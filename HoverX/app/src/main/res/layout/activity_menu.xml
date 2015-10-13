@@ -28,9 +28,19 @@
         android:id="@+id/drive_button"
         android:layout_width="200dp"
         android:layout_height="75dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:text="Drive"
         android:textSize="30dp"
-        android:onClick="enable_drive"/>
+        android:onClick="enable_drive"
+        android:layout_below="@+id/connect_text"
+        android:layout_alignLeft="@+id/connect_button"
+        android:layout_alignStart="@+id/connect_button"
+        android:layout_marginTop="29dp" />
+
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/expandableListView"
+        android:layout_marginTop="39dp"
+        android:layout_below="@+id/drive_button"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
