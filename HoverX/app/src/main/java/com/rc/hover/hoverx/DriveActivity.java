@@ -11,7 +11,6 @@ public class DriveActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drive);
-<<<<<<< HEAD
 
         vsb1 = (VerticalSeekBar)findViewById(R.id.seekBar);
         vsb2 = (VerticalSeekBar)findViewById(R.id.seekBar2);
@@ -53,8 +52,5 @@ public class DriveActivity extends AppCompatActivity {
                 ((VerticalSeekBar)seekBar).setProgressAndThumb(50);
             }
         });
-
-=======
->>>>>>> parent of 3c1cd6e... added vertical seekbars for drive view
     }
 }
