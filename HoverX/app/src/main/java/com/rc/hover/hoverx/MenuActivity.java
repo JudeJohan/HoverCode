@@ -107,8 +107,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
 
 
     }
-
-    @Override
+    
     public void connect(WifiP2pConfig config) {
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
