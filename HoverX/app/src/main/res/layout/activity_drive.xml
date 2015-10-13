@@ -4,13 +4,13 @@
     android:layout_height="match_parent">
 
     <com.rc.hover.hoverx.VerticalSeekBar
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:id="@+id/seekBar"
         android:scrollbars="vertical"
         android:layout_alignParentLeft="true"
-        android:indeterminate="false"
-        android:layout_marginLeft="20dp"/>
+        android:layout_centerHorizontal="true"
+        android:indeterminate="false" />
 
     <com.rc.hover.hoverx.VerticalSeekBar
         android:layout_width="wrap_content"
@@ -18,8 +18,7 @@
         android:id="@+id/seekBar2"
         android:layout_alignParentRight="true"
         android:layout_centerHorizontal="true"
-        android:indeterminate="false"
-        android:layout_marginRight="20dp" />
+        android:indeterminate="false" />
 
     <TextView
         android:layout_width="wrap_content"
