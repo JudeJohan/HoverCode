@@ -28,3 +28,6 @@ proguard/
 
 # Temp  log files
 *.stackdump
+
+# Anything with iml
+*.iml
