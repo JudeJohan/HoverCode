@@ -36,11 +36,12 @@
         android:layout_alignStart="@+id/connect_button"
         android:layout_marginTop="29dp" />
 
-    <ExpandableListView
+    <ListView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/expandableListView"
-        android:layout_marginTop="39dp"
-        android:layout_below="@+id/drive_button"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="100dp"
+        android:id="@+id/listView"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/drive_button" />
+
 </RelativeLayout>
