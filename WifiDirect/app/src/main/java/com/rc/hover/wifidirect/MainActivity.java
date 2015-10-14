@@ -116,7 +116,20 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_register_receiver) {
+            onClickMenuRegister(null);
+            return true;
+        }
+        else if (id == R.id.menu_unregister_receiver) {
+            onClickMenuUnregister(null);
+            return true;
+        }
+        else if (id == R.id.menu_discover_devices) {
+            onClickMenuDiscover(null);
+            return true;
+        }
+        else if (id == R.id.menu_connect) {
+            onClickMenuConnect(null);
             return true;
         }
 

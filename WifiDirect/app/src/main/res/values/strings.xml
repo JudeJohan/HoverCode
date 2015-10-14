@@ -2,5 +2,8 @@
     <string name="app_name">Wifi Direct</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="menu_register_receiver">Register Receiver</string>
+    <string name="menu_unregister_receiver">Unregister Receiver</string>
+    <string name="menu_discover_devices">Discover Devices</string>
+    <string name="menu_connect">Connect</string>
 </resources>
