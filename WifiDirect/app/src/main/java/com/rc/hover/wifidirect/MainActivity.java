@@ -48,7 +48,7 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
     {
         if(isWfdReceiverRegisteredAndFeatureEnabled())
         {
-
+            _wfdManager.discoverPeers(_wfdChannel, new ActionListenerHandler(this, "Discover Peers"));
         }
     }
 
