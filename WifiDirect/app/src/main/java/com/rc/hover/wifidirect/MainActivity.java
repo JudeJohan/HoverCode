@@ -1,13 +1,19 @@
 package com.rc.hover.wifidirect;
 
 import android.app.Activity;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements WifiP2pManager.ChannelListener {
 
@@ -15,6 +21,12 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
     private WifiP2pManager.Channel _wfdChannel;
 
     private WiFiDirectReceiver _wfdReceiver;
+
+    public ListView _listView = null;
+    public ArrayList<String> _arrayList = null;
+    public ArrayAdapter<String> _arrayAdapter = null;
+
+    public WifiP2pDevice _selectedDevice = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +36,10 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
         _wfdManager = (WifiP2pManager)getSystemService(WIFI_P2P_SERVICE);
         _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
 
-
+        _listView = (ListView) this.findViewById(R.id.listView);
+        _arrayList = new ArrayList<String>();
+        _arrayAdapter = new ArrayAdapter<String>(this, R.layout.item, _arrayList);
+        _listView.setAdapter(_arrayAdapter);
     }
 
     @Override
@@ -59,7 +74,10 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
             WifiP2pDevice theDevice = _wfdReceiver.getFirstAvailableDevice();
             if(theDevice != null)
             {
-
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = theDevice.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+                _wfdManager.connect(_wfdChannel, config, new ActionListenerHandler(this, "Connection"));
             }
             else
             {

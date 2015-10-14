@@ -89,12 +89,20 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     }
     private void  handleWifiP2pPeersChanged(Intent intent)
     {
+        _wfdManager.requestPeers(_wfdChannel, this);
         //WifiP2pDevice thisDevice = intent.getParcelableExtra();
     }
     private void  handleWifiP2pConnectionChanged(Intent intent)
     {
-
+        NetworkInfo info = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+        if(info != null && info.isConnected()) {
+            _wfdManager.requestConnectionInfo(_wfdChannel, this);
+        }
+        else {
+            _appMainActivity.displayToast("Connection closed.");
+        }
     }
+
     private void  handleWifiP2pThisDeviceChanged(Intent intent)
     {
         WifiP2pDevice thisDevice = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
@@ -115,11 +123,34 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
+        if(info.groupFormed) {
+            if(info.isGroupOwner) {
 
+            }
+            else {
+                //open a socket to info.groupOwnerAddress
+            }
+        }
     }
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peers) {
+        _appMainActivity.displayToast("onPeersAvaliable");
 
+        if(peers != null &&
+                peers.getDeviceList() != null &&
+                peers.getDeviceList().size() > 0) {
+            _wfdDevices = peers.getDeviceList().toArray(new WifiP2pDevice[0]);
+            _appMainActivity._arrayList.clear();
+            for(int i = 0; i < _wfdDevices.length; i++) {
+                _appMainActivity._arrayList.add(i, _wfdDevices.toString());
+            }
+            _appMainActivity._arrayAdapter.clear();
+            _appMainActivity._arrayAdapter.notifyDataSetChanged();
+            _appMainActivity._arrayAdapter.addAll(_appMainActivity._arrayList);
+        }
+        else {
+            _wfdDevices = null;
+        }
     }
 }
