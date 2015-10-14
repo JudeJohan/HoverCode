@@ -1,5 +1,6 @@
 package com.rc.hover.wifidirect;
 
+import android.app.Activity;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.support.v7.app.AppCompatActivity;
@@ -8,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
+public class MainActivity extends Activity implements WifiP2pManager.ChannelListener {
 
     private WifiP2pManager _wfdManager;
     private WifiP2pManager.Channel _wfdChannel;

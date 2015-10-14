@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
@@ -17,12 +19,15 @@ import android.util.Log;
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
  */
-public class WiFiDirectReceiver extends BroadcastReceiver {
+public class WiFiDirectReceiver extends BroadcastReceiver implements
+        WifiP2pManager.PeerListListener,
+        WifiP2pManager.ConnectionInfoListener {
 
     WifiP2pManager _wfdManager = null;
     WifiP2pManager.Channel _wfdChannel = null;
     MainActivity _appMainActivity = null;
-    boolean _isWifiDirectEnabled = false;
+    private boolean _isWifiDirectEnabled = false;
+    WifiP2pDevice[] _wfdDevices = null;
 
     private IntentFilter _intentFilter = null;
     public WiFiDirectReceiver(){}
@@ -80,11 +85,11 @@ public class WiFiDirectReceiver extends BroadcastReceiver {
     private void  handleWifiP2pStateChanged(Intent intent)
     {
         int wfdState = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-        _isWifiDirectEnabled = wfdState == WifiP2pManager.WIFI_P2P_STATE_ENABLED ? true : false;
+        _isWifiDirectEnabled = (wfdState == WifiP2pManager.WIFI_P2P_STATE_ENABLED);
     }
     private void  handleWifiP2pPeersChanged(Intent intent)
     {
-        WifiP2pDevice thisDevice = intent.getParcelableExtra()
+        //WifiP2pDevice thisDevice = intent.getParcelableExtra();
     }
     private void  handleWifiP2pConnectionChanged(Intent intent)
     {
@@ -108,4 +113,13 @@ public class WiFiDirectReceiver extends BroadcastReceiver {
         return _intentFilter;
     }
 
+    @Override
+    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+
+    }
+
+    @Override
+    public void onPeersAvailable(WifiP2pDeviceList peers) {
+
+    }
 }
