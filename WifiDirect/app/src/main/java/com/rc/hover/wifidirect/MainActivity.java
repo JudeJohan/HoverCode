@@ -101,12 +101,14 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Ch
     {
         finish();
     }
+
     @Override
     protected void onDestroy()
     {
         super.onDestroy();
         unregisterWfdReceiver();
     }
+
     private boolean isWfdReceiverRegisteredAndFeatureEnabled()
     {
         boolean isWfdUsable = _wfdReceiver != null && _wfdReceiver.isWifiDirectEnabled();
@@ -169,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Ch
     public void onChannelDisconnected(){
         displayToast("Wifi Direct channel disconnected - Reinitializing");
         reinitializeChannel();
-
     }
 
     private void reinitializeChannel(){
@@ -181,6 +182,5 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Ch
         {
             displayToast("Initialization failed");
         }
-
     }
 }

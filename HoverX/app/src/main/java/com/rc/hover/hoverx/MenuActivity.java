@@ -6,13 +6,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.wifi.WpsInfo;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.internal.view.menu.MenuView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -26,56 +30,42 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
-public class MenuActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener  {
+public class MenuActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
 
-    ListView itemList;
-    final HashMap<String, String> buddies = new HashMap<String, String>();
-    ArrayList<String> itemArrayList = new ArrayList<String>();
-    ArrayAdapter<String> itemArrayAdapter;
+    ListView _listView = null;
+    ArrayList<String> _arrayList = new ArrayList<String>();
+    ArrayAdapter<String> _arrayAdapter = null;
+    private WiFiDirectReceiver _wfdReceiver = null;
+    private WifiP2pManager _wfdManager = null;
+    private WifiP2pManager.Channel _wfdChannel = null;
+    public WifiP2pDevice _selectedDevice = null;
+
+    private Timer timer = null;
+    private TimerTask timerTask = null;
+
+    Handler m_handler;
+    Runnable m_handlerTask ;
+
     private final IntentFilter intentFilter = new IntentFilter();
-    WifiP2pManager.Channel mChannel;
-    WifiP2pManager mManager;
+
     public static final String TAG = "wifidirectdemo";
-    private boolean isWifiP2pEnabled = false;
-    private boolean retryChannel = false;
-
-    private BroadcastReceiver receiver = null;
-    private List peers = new ArrayList();
-
-
-    public WifiP2pManager.PeerListListener peerListListener = new WifiP2pManager.PeerListListener() {
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
-            // Out with the old, in with the new.
-            peers.clear();
-            peers.addAll(wifiP2pDeviceList.getDeviceList());
-
-            // If an AdapterView is backed by this data, notify it
-            // of the change.  For instance, if you have a ListView of available
-            // peers, trigger an update.
-            itemArrayAdapter.notifyDataSetChanged();
-            if (peers.size() == 0) {
-                Log.d(TAG, "No devices found");
-                return;
-            }
-
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        itemList = (ListView) findViewById(R.id.listView);
+        _wfdManager = (WifiP2pManager)getSystemService(WIFI_P2P_SERVICE);
+        _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
+        _listView = (ListView) findViewById(R.id.listView);
         final Button connect = (Button) findViewById(R.id.connect_button);
         final Button drive = (Button) findViewById(R.id.drive_button);
         drive.setEnabled(false);
         final TextView connect_status = (TextView) findViewById(R.id.connect_text);
-
-        receiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this);
 
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,31 +87,43 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
             }
         });
 
-        itemArrayAdapter = new ArrayAdapter<String>(this,
+        _arrayAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
-                itemArrayList);
-        itemList.setAdapter(itemArrayAdapter);
+                R.id.textView1,
+                _arrayList);
+        _listView.setAdapter(_arrayAdapter);
 
-        //discoverService();
-        setUpWifi();
-
-
-    }
-    
-    public void connect(WifiP2pConfig config) {
-        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-
+        _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onSuccess() {
-                // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                Toast.makeText(MenuActivity.this, "Connect failed. Retry.",
-                        Toast.LENGTH_SHORT).show();
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                _selectedDevice = _wfdReceiver._wfdDevices[position];
+                onClickMenuConnect(null);
             }
         });
+
+        //unregisterWfdReceiver();
+        _wfdReceiver = new WiFiDirectReceiver(_wfdManager, _wfdChannel, this);
+        _wfdReceiver.registerReceiver();
+
+        /*timer = new Timer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                displayToast("TIMER");
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 4000, 5000);*/
+
+        m_handler = new Handler();
+        m_handlerTask = new Runnable() {
+            @Override
+            public void run() {
+                m_handler.postDelayed(m_handlerTask, 5000);
+                //displayToast("TIMER");
+                onClickMenuDiscover(null);
+            }
+        };
+        m_handler.postDelayed(m_handlerTask, 5000);
     }
 
     public void enable_drive(View v){
@@ -152,60 +154,89 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         return super.onOptionsItemSelected(item);
     }
 
-    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
-        this.isWifiP2pEnabled = isWifiP2pEnabled;
+    public void displayToast(String s) {
+        Toast toast = Toast.makeText(this, s, Toast.LENGTH_LONG);
+        toast.show();
     }
 
-    private void setUpWifi() {
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+    public void onClickMenuDiscover(MenuItem item)
+    {
+        if(isWfdReceiverRegisteredAndFeatureEnabled())
+        {
+            _wfdManager.discoverPeers(_wfdChannel, new ActionListenerHandler(this, "Discover Peers"));
+        }
+    }
 
-        mManager = (WifiP2pManager)getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-
+    public void onClickMenuConnect(MenuItem item)
+    {
+        if(isWfdReceiverRegisteredAndFeatureEnabled())
+        {
+            //WifiP2pDevice theDevice = _wfdReceiver.getFirstAvailableDevice();
+            WifiP2pDevice theDevice = _selectedDevice;
+            if(theDevice != null)
+            {
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = theDevice.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+                _wfdManager.connect(_wfdChannel, config, new ActionListenerHandler(this, "Connection"));
             }
-
-            @Override
-            public void onFailure(int i) {
-
+            else
+            {
+                displayToast("No device currently available");
             }
-        });
+        }
+
+    }
+
+    private boolean isWfdReceiverRegisteredAndFeatureEnabled()
+    {
+        boolean isWfdUsable = _wfdReceiver != null && _wfdReceiver.isWifiDirectEnabled();
+        if(!isWfdUsable)
+        {
+            showWfdReceiverNotRegisteredOrFeatureNotEnabledMessage();
+        }
+        return isWfdUsable;
+    }
+
+    private void showWfdReceiverNotRegisteredOrFeatureNotEnabledMessage()
+    {
+        displayToast(_wfdReceiver == null ? "Wifi Broadcast Receiver Not Yet Registered" : "Wifi Direct Not Enabled On Phone");
+    }
+
+    public void onChannelDisconnected(){
+        displayToast("Wifi Direct channel disconnected - Reinitializing");
+        reinitializeChannel();
+    }
+
+    private void reinitializeChannel(){
+        _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
+        if(_wfdChannel != null){
+            displayToast("Initialization successful");
+        }
+        else
+        {
+            displayToast("Initialization failed");
+        }
+    }
+
+    private void unregisterWfdReceiver(){
+        if(_wfdReceiver != null)
+        {
+            _wfdReceiver.unregisterReceiver();
+            _wfdReceiver = null;
+        }
     }
 
     @Override
-    public void onChannelDisconnected() {
-
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterWfdReceiver();
+        if(timer != null)
+        {
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
     }
-
-    /*private void discoverService() {
-        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
-            @Override
-            public void onDnsSdTxtRecordAvailable(String s, Map<String, String> map, WifiP2pDevice wifiP2pDevice) {
-                Log.d("HoverX", "DNS SD TXT RECORD AVAILABLE - " + map.toString());
-                buddies.put(wifiP2pDevice.deviceAddress, map.get("buddyname"));
-                itemArrayList.add(map.get("buddyname") + " : " + wifiP2pDevice.deviceAddress);
-                itemArrayAdapter.notifyDataSetChanged();
-                //itemArrayAdapter.add(map.get("buddyname") + " : " + wifiP2pDevice.deviceAddress);
-
-                WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-                    @Override
-                    public void onDnsSdServiceAvailable(String instanceName,
-                                                        String registrationType,
-                                                        WifiP2pDevice resourceType) {
-                        resourceType.deviceName =
-                                buddies.containsKey(resourceType.deviceAddress) ?
-                                        buddies.get(resourceType.deviceAddress) :
-                                        resourceType.deviceName;
-                    }
-                };
-            }
-        };
-    }*/
-
 }
