@@ -9,13 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MainActivity extends Activity implements WifiP2pManager.ChannelListener {
+public class MainActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
 
     private WifiP2pManager _wfdManager;
     private WifiP2pManager.Channel _wfdChannel;
@@ -38,8 +40,16 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
 
         _listView = (ListView) this.findViewById(R.id.listView);
         _arrayList = new ArrayList<String>();
-        _arrayAdapter = new ArrayAdapter<String>(this, R.layout.item, _arrayList);
+        _arrayAdapter = new ArrayAdapter<String>(this, R.layout.item, R.id.textView1, _arrayList);
         _listView.setAdapter(_arrayAdapter);
+
+        _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                _selectedDevice = _wfdReceiver._wfdDevices[position];
+                onClickMenuConnect(null);
+            }
+        });
     }
 
     @Override
@@ -71,7 +81,8 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
     {
         if(isWfdReceiverRegisteredAndFeatureEnabled())
         {
-            WifiP2pDevice theDevice = _wfdReceiver.getFirstAvailableDevice();
+            //WifiP2pDevice theDevice = _wfdReceiver.getFirstAvailableDevice();
+            WifiP2pDevice theDevice = _selectedDevice;
             if(theDevice != null)
             {
                 WifiP2pConfig config = new WifiP2pConfig();
@@ -147,6 +158,7 @@ public class MainActivity extends Activity implements WifiP2pManager.ChannelList
             return true;
         }
         else if (id == R.id.menu_connect) {
+            _selectedDevice =  _wfdReceiver.getFirstAvailableDevice();
             onClickMenuConnect(null);
             return true;
         }

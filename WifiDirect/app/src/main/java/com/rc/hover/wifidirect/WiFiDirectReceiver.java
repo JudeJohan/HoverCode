@@ -27,7 +27,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     WifiP2pManager.Channel _wfdChannel = null;
     MainActivity _appMainActivity = null;
     private boolean _isWifiDirectEnabled = false;
-    WifiP2pDevice[] _wfdDevices = null;
+    public WifiP2pDevice[] _wfdDevices = null;
 
     private IntentFilter _intentFilter = null;
     public WiFiDirectReceiver(){}
@@ -142,12 +142,11 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                 peers.getDeviceList().size() > 0) {
             _wfdDevices = peers.getDeviceList().toArray(new WifiP2pDevice[0]);
             _appMainActivity._arrayList.clear();
-            for(int i = 0; i < _wfdDevices.length; i++) {
-                _appMainActivity._arrayList.add(i, _wfdDevices.toString());
-            }
             _appMainActivity._arrayAdapter.clear();
+            for(int i = 0; i < _wfdDevices.length; i++) {
+                _appMainActivity._arrayList.add(i, _wfdDevices[i].deviceName);
+            }
             _appMainActivity._arrayAdapter.notifyDataSetChanged();
-            _appMainActivity._arrayAdapter.addAll(_appMainActivity._arrayList);
         }
         else {
             _wfdDevices = null;
