@@ -48,6 +48,12 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
 
     Handler m_handler;
     Runnable m_handlerTask ;
+    final Runnable toastMe = new Runnable() {
+        @Override
+        public void run() {
+            displayToast(_threadSpeaker.text_from_read);
+        }
+    };
 
     private final IntentFilter intentFilter = new IntentFilter();
 
@@ -81,7 +87,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
                     connect.setText(R.string.disconnect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.LIME));
                     drive.setEnabled(true);
-                    _threadSpeaker.text = "Hej min vän";
+                    _threadSpeaker.text_to_write = "Hej min vän";
                 } else if (connect.getText() == getResources().getString(R.string.disconnect_button)) {
                     connect_status.setText(R.string.connection_status);
                     connect.setText(R.string.connect_button);
