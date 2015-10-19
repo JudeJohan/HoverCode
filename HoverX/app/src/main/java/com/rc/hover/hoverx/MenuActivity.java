@@ -92,6 +92,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
                 _selectedDevice = _wfdReceiver._wfdDevices[position];
                 onClickMenuConnect(null);
             }
