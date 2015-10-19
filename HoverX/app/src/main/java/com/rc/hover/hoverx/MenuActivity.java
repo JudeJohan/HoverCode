@@ -26,6 +26,7 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.app.ListFragment;
 import android.widget.Toast;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
                     connect.setText(R.string.disconnect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.LIME));
                     drive.setEnabled(true);
+                    _threadSpeaker.text = "Hej min vän";
                 } else if (connect.getText() == getResources().getString(R.string.disconnect_button)) {
                     connect_status.setText(R.string.connection_status);
                     connect.setText(R.string.connect_button);
@@ -215,6 +217,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
             _wfdReceiver = null;
         }
     }
+
 
     @Override
     protected void onDestroy()
