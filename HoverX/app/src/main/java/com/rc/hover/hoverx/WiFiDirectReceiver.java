@@ -41,6 +41,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
     private IntentFilter _intentFilter = null;
     Thread networkThread = null;
+    public ThreadSpeaker _threadSpeaker = null;
 
     public WiFiDirectReceiver(){}
 
@@ -50,6 +51,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
          _wfdManager = wfdManager;
          _wfdChannel = wfdChannel;
          _appMainActivity = appMainActivity;
+        _threadSpeaker = _appMainActivity._threadSpeaker;
     }
 
     public void registerReceiver(){

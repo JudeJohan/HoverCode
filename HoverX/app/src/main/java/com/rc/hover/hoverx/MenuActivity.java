@@ -37,6 +37,7 @@ import java.util.TimerTask;
 
 public class MenuActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
 
+    public ThreadSpeaker _threadSpeaker = null;
     public ListView _listView = null;
     public List<String> _arrayList = null;
     public ArrayAdapter<String> _arrayAdapter = null;
@@ -57,6 +58,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+        _threadSpeaker = new ThreadSpeaker();
         _arrayList = new ArrayList<String>();
         _wfdManager = (WifiP2pManager)getSystemService(WIFI_P2P_SERVICE);
         _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
