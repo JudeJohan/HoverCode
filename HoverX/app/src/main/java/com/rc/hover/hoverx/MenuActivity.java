@@ -164,6 +164,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
                 config.deviceAddress = theDevice.deviceAddress;
                 config.wps.setup = WpsInfo.PBC;
                 _wfdManager.connect(_wfdChannel, config, new ActionListenerHandler(this, "Connection"));
+                displayToast("Connected to: " + theDevice.deviceName);
             }
             else
             {

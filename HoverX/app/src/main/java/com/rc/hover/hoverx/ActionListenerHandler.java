@@ -17,7 +17,7 @@ public class ActionListenerHandler implements WifiP2pManager.ActionListener {
 
     @Override
     public void onSuccess() {
-        _mainActivity.displayToast(_actionDisplayText + " started!");
+        //_mainActivity.displayToast(_actionDisplayText + " started!");
     }
 
     @Override
