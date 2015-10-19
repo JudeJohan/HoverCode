@@ -97,16 +97,13 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         }
         else {
             _appMainActivity.displayToast("Connection closed.");
+            _appMainActivity.connect_id.setText("Disconnected!");
         }
     }
 
     private void  handleWifiP2pThisDeviceChanged(Intent intent)
     {
         WifiP2pDevice thisDevice = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-        if(thisDevice != null)
-            _appMainActivity.connect_id.setText("Connected to: " + thisDevice.deviceName);
-        else
-            _appMainActivity.connect_id.setText("Disconnected");
     }
 
     private IntentFilter getIntentFilter()
@@ -125,8 +122,9 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
+            info.
             if(info.isGroupOwner) {
-
+                _appMainActivity.connect_id.setText("Connected to: " + info.groupOwnerAddress.getHostName());
             }
             else {
                 //open a socket to info.groupOwnerAddress
