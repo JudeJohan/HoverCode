@@ -63,22 +63,19 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     {
         String action = intent.getAction();
 
-        if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action))
-        {
+        if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             handleWifiP2pStateChanged(intent);
         }
-        if(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action))
-        {
+        if(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             handleWifiP2pPeersChanged(intent);
         }
-        if(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action))
-        {
+        if(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             handleWifiP2pConnectionChanged(intent);
         }
-        if(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action))
-        {
+        if(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             handleWifiP2pThisDeviceChanged(intent);
         }
+
     }
 
 
@@ -97,7 +94,6 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         NetworkInfo info = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
         if(info != null && info.isConnected()) {
             _wfdManager.requestConnectionInfo(_wfdChannel, this);
-            _appMainActivity.connect_id.setText("Connected to: " + _appMainActivity._selectedDevice.deviceName);
         }
         else {
             _appMainActivity.displayToast("Connection closed.");
@@ -107,6 +103,10 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     private void  handleWifiP2pThisDeviceChanged(Intent intent)
     {
         WifiP2pDevice thisDevice = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+        if(thisDevice != null)
+            _appMainActivity.connect_id.setText("Connected to: " + thisDevice.deviceName);
+        else
+            _appMainActivity.connect_id.setText("Disconnected");
     }
 
     private IntentFilter getIntentFilter()
