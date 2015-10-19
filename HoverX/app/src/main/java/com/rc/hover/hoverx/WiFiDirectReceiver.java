@@ -17,10 +17,12 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -219,7 +221,18 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                 }
                 else
                 {
-
+                    if(_threadSpeaker.text != null)
+                    {
+                        try {
+                            byte[] buff = _threadSpeaker.text.getBytes("UTF-8");
+                            socket.getOutputStream().write(buff);
+                            _threadSpeaker.text = null;
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }
@@ -242,6 +255,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         String read = _input.readLine();
+                        _appMainActivity.displayToast(read);
                         //updateConversationHandler.post(new updateUIThread(read));
                     } catch (IOException e) {
                         e.printStackTrace();
