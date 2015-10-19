@@ -36,16 +36,13 @@ import java.util.TimerTask;
 
 public class MenuActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
 
-    ListView _listView = null;
-    ArrayList<String> _arrayList = new ArrayList<String>();
-    ArrayAdapter<String> _arrayAdapter = null;
+    public ListView _listView = null;
+    public List<String> _arrayList = null;
+    public ArrayAdapter<String> _arrayAdapter = null;
     private WiFiDirectReceiver _wfdReceiver = null;
     private WifiP2pManager _wfdManager = null;
     private WifiP2pManager.Channel _wfdChannel = null;
     public WifiP2pDevice _selectedDevice = null;
-
-    private Timer timer = null;
-    private TimerTask timerTask = null;
 
     Handler m_handler;
     Runnable m_handlerTask ;
@@ -59,9 +56,15 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+        _arrayList = new ArrayList<String>();
         _wfdManager = (WifiP2pManager)getSystemService(WIFI_P2P_SERVICE);
         _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
         _listView = (ListView) findViewById(R.id.listView);
+        _arrayAdapter = new ArrayAdapter<String>(this,
+                R.layout.item,
+                R.id.textView1,
+                _arrayList);
+        _listView.setAdapter(_arrayAdapter);
         final Button connect = (Button) findViewById(R.id.connect_button);
         final Button drive = (Button) findViewById(R.id.drive_button);
         drive.setEnabled(false);
@@ -70,15 +73,12 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(connect.getText() == getResources().getString(R.string.connect_button))
-                {
+                if (connect.getText() == getResources().getString(R.string.connect_button)) {
                     connect_status.setText(R.string.connection_status_con);
                     connect.setText(R.string.disconnect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.LIME));
                     drive.setEnabled(true);
-                }
-                else if(connect.getText() ==  getResources().getString(R.string.disconnect_button))
-                {
+                } else if (connect.getText() == getResources().getString(R.string.disconnect_button)) {
                     connect_status.setText(R.string.connection_status);
                     connect.setText(R.string.connect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.RED));
@@ -87,11 +87,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
             }
         });
 
-        _arrayAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                R.id.textView1,
-                _arrayList);
-        _listView.setAdapter(_arrayAdapter);
+
 
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -101,25 +97,14 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
             }
         });
 
-        //unregisterWfdReceiver();
         _wfdReceiver = new WiFiDirectReceiver(_wfdManager, _wfdChannel, this);
         _wfdReceiver.registerReceiver();
-
-        /*timer = new Timer();
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                displayToast("TIMER");
-            }
-        };
-        timer.scheduleAtFixedRate(timerTask, 4000, 5000);*/
 
         m_handler = new Handler();
         m_handlerTask = new Runnable() {
             @Override
             public void run() {
                 m_handler.postDelayed(m_handlerTask, 5000);
-                //displayToast("TIMER");
                 onClickMenuDiscover(null);
             }
         };
@@ -232,11 +217,5 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
     {
         super.onDestroy();
         unregisterWfdReceiver();
-        if(timer != null)
-        {
-            timer.cancel();
-            timer.purge();
-            timer = null;
-        }
     }
 }
