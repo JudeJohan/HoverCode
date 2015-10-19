@@ -15,9 +15,12 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.os.Handler;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -133,18 +136,18 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
             if(info.isGroupOwner) {
-               /* if(networkThread != null) {
+               if(networkThread != null) {
                     networkThread.interrupt();
-                }*/
-                networkThread = new Thread(new netThread(true, 10101, null));
+                }
+                networkThread = new Thread(new nettThread(true, 10101, null));
                 networkThread.start();
                 //socket.bind();
             }
             else {
-                /*if(networkThread != null) {
+                if(networkThread != null) {
                     networkThread.interrupt();
-                }*/
-                networkThread = new Thread(new netThread(false, 10101, info.groupOwnerAddress));
+                }
+                networkThread = new Thread(new nettThread(false, 10101, info.groupOwnerAddress));
                 networkThread.start();
                 //open a socket to info.groupOwnerAddress
             }
@@ -167,6 +170,78 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
             _appMainActivity._arrayAdapter.notifyDataSetChanged();
         } else {
             _wfdDevices = null;
+        }
+    }
+
+    class nettThread implements Runnable {
+
+        private boolean _isServer = false;
+        private InetAddress _serverAddr = null;
+        private int _port = 0;
+        public Socket socket = null;
+        public ServerSocket serverSocket = null;
+
+        Handler updateConversationHandler;
+
+        public nettThread(boolean isServer, int port, InetAddress serverAddr) {
+            _isServer = isServer;
+            _serverAddr = serverAddr;
+            _port = port;
+        }
+
+        @Override
+        public void run() {
+            if (_isServer) {
+                try {
+                    serverSocket = new ServerSocket(_port);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(_serverAddr, _port), 5000);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            while (!Thread.currentThread().isInterrupted()) {
+                if(_isServer) {
+                    try {
+                        socket = serverSocket.accept();
+                        commThread comThread = new commThread(socket);
+                        new Thread(comThread).start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        class commThread implements Runnable {
+            private Socket _clientSocket;
+            private BufferedReader _input;
+
+            public commThread(Socket clientSocket) {
+                _clientSocket = clientSocket;
+                try {
+                    _input = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
+                } catch (IOException e) {
+
+                }
+            }
+
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        String read = _input.readLine();
+                        //updateConversationHandler.post(new updateUIThread(read));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 }
