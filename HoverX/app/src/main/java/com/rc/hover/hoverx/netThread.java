@@ -18,9 +18,14 @@ public class netThread implements Runnable {
         _isServer = isServer;
         _serverAddr = serverAddr;
         _port = port;
+    }
+
+    @Override
+    public void run() {
+
         if(_isServer) {
             try {
-                serverSocket = new ServerSocket(port);
+                serverSocket = new ServerSocket(_port);
                 socket = serverSocket.accept();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -28,15 +33,12 @@ public class netThread implements Runnable {
         }
         else {
             try {
+                socket = new Socket();
                 socket.connect(new InetSocketAddress(_serverAddr, _port), 5000);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void run() {
         while(!Thread.currentThread().isInterrupted()) {
 
         }
