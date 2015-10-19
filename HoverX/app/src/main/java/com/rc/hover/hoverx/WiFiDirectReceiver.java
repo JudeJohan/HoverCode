@@ -135,24 +135,19 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peers) {
-        _appMainActivity.displayToast("PEERS?");
+        _appMainActivity.displayToast("onPeersAvaliable");
 
         if(peers != null &&
                 peers.getDeviceList() != null &&
-                peers.getDeviceList().size() > 0 &&
-                peers.getDeviceList().toArray(new WifiP2pDevice[0])[0] != null) {
-            _appMainActivity.displayToast("PEERS!");
+                peers.getDeviceList().size() > 0) {
             _wfdDevices = peers.getDeviceList().toArray(new WifiP2pDevice[0]);
             _appMainActivity._arrayList.clear();
             _appMainActivity._arrayAdapter.clear();
             for(int i = 0; i < _wfdDevices.length; i++) {
-                if(_wfdDevices[i] != null) {
-                    _appMainActivity._arrayList.add(i, _wfdDevices[i].deviceName);
-                }
+                _appMainActivity._arrayList.add(i, _wfdDevices[i].deviceName);
             }
             _appMainActivity._arrayAdapter.notifyDataSetChanged();
-        }
-        else {
+        } else {
             _wfdDevices = null;
         }
     }
