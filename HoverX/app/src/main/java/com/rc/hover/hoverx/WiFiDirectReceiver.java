@@ -133,17 +133,17 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
             if(info.isGroupOwner) {
-                if(networkThread != null) {
+               /* if(networkThread != null) {
                     networkThread.interrupt();
-                }
+                }*/
                 networkThread = new Thread(new netThread(true, 10101, null));
                 networkThread.start();
                 //socket.bind();
             }
             else {
-                if(networkThread != null) {
+                /*if(networkThread != null) {
                     networkThread.interrupt();
-                }
+                }*/
                 networkThread = new Thread(new netThread(false, 10101, info.groupOwnerAddress));
                 networkThread.start();
                 //open a socket to info.groupOwnerAddress

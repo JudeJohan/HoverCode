@@ -36,6 +36,7 @@ public class netThread implements Runnable {
             }
         } else {
             try {
+                socket = new Socket();
                 socket.connect(new InetSocketAddress(_serverAddr, _port), 5000);
             } catch (IOException e) {
                 e.printStackTrace();
