@@ -97,6 +97,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         NetworkInfo info = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
         if(info != null && info.isConnected()) {
             _wfdManager.requestConnectionInfo(_wfdChannel, this);
+            _appMainActivity.connect_id.setText("Connected to: " + _appMainActivity._selectedDevice.deviceName);
         }
         else {
             _appMainActivity.displayToast("Connection closed.");

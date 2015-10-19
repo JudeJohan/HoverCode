@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Ch
     public ArrayAdapter<String> _arrayAdapter = null;
 
     public WifiP2pDevice _selectedDevice = null;
+    public TextView connect_id = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Ch
         _arrayList = new ArrayList<String>();
         _arrayAdapter = new ArrayAdapter<String>(this, R.layout.item, R.id.textView1, _arrayList);
         _listView.setAdapter(_arrayAdapter);
+        connect_id = (TextView) findViewById(R.id.connected_to_txt);
+        connect_id.setText("No connection!");
 
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
