@@ -93,6 +93,7 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
                     connect.setText(R.string.connect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.RED));
                     drive.setEnabled(false);
+                    _threadSpeaker.text_to_write = "Hej då min vän";
                 }
             }
         });
