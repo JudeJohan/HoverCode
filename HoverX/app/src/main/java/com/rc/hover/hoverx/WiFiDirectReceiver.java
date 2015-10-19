@@ -16,6 +16,12 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
  */
@@ -30,8 +36,10 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public WifiP2pDevice[] _wfdDevices = null;
 
     private IntentFilter _intentFilter = null;
-    public WiFiDirectReceiver(){}
+    Socket socket = null;
+    ServerSocket serverSocket = null;
 
+    public WiFiDirectReceiver(){}
 
     public WiFiDirectReceiver(WifiP2pManager wfdManager, WifiP2pManager.Channel wfdChannel,
                               MenuActivity appMainActivity) {
@@ -125,9 +133,27 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
             if(info.isGroupOwner) {
-
+                try {
+                    serverSocket = new ServerSocket(10101);
+                    socket = serverSocket.accept();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //socket.bind();
             }
             else {
+                try {
+                    if(socket != null)
+                        socket.close();
+                    socket = new Socket();
+                    socket.connect(new InetSocketAddress(info.groupOwnerAddress, 10101), 5000);
+                    _appMainActivity.displayToast("Connected to " + info.groupOwnerAddress.getCanonicalHostName());
+                }
+                catch (IOException e) {
+                    _appMainActivity.displayToast("Exception: " + e.toString() + ": " + e.getMessage());
+                    e.printStackTrace();
+                }
+
                 //open a socket to info.groupOwnerAddress
             }
         }
@@ -135,24 +161,19 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peers) {
-        _appMainActivity.displayToast("PEERS?");
+        //_appMainActivity.displayToast("onPeersAvaliable");
 
         if(peers != null &&
                 peers.getDeviceList() != null &&
-                peers.getDeviceList().size() > 0 &&
-                peers.getDeviceList().toArray(new WifiP2pDevice[0])[0] != null) {
-            _appMainActivity.displayToast("PEERS!");
+                peers.getDeviceList().size() > 0) {
             _wfdDevices = peers.getDeviceList().toArray(new WifiP2pDevice[0]);
             _appMainActivity._arrayList.clear();
             _appMainActivity._arrayAdapter.clear();
             for(int i = 0; i < _wfdDevices.length; i++) {
-                if(_wfdDevices[i] != null) {
-                    _appMainActivity._arrayList.add(i, _wfdDevices[i].deviceName);
-                }
+                _appMainActivity._arrayList.add(i, _wfdDevices[i].deviceName);
             }
             _appMainActivity._arrayAdapter.notifyDataSetChanged();
-        }
-        else {
+        } else {
             _wfdDevices = null;
         }
     }
