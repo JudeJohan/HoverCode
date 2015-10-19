@@ -18,6 +18,7 @@ import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -36,8 +37,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public WifiP2pDevice[] _wfdDevices = null;
 
     private IntentFilter _intentFilter = null;
-    Socket socket = null;
-    ServerSocket serverSocket = null;
+    Thread networkThread = null;
 
     public WiFiDirectReceiver(){}
 
@@ -133,27 +133,19 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
             if(info.isGroupOwner) {
-                try {
-                    serverSocket = new ServerSocket(10101);
-                    socket = serverSocket.accept();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(networkThread != null) {
+                    networkThread.interrupt();
                 }
+                networkThread = new Thread(new netThread(true, 10101, null));
+                networkThread.start();
                 //socket.bind();
             }
             else {
-                try {
-                    if(socket != null)
-                        socket.close();
-                    socket = new Socket();
-                    socket.connect(new InetSocketAddress(info.groupOwnerAddress, 10101), 5000);
-                    _appMainActivity.displayToast("Connected to " + info.groupOwnerAddress.getCanonicalHostName());
+                if(networkThread != null) {
+                    networkThread.interrupt();
                 }
-                catch (IOException e) {
-                    _appMainActivity.displayToast("Exception: " + e.toString() + ": " + e.getMessage());
-                    e.printStackTrace();
-                }
-
+                networkThread = new Thread(new netThread(false, 10101, info.groupOwnerAddress));
+                networkThread.start();
                 //open a socket to info.groupOwnerAddress
             }
         }
@@ -178,3 +170,4 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         }
     }
 }
+
