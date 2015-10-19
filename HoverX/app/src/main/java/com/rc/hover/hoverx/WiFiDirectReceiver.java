@@ -215,6 +215,10 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                         e.printStackTrace();
                     }
                 }
+                else
+                {
+
+                }
             }
         }
 
