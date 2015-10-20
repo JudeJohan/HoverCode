@@ -213,7 +213,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                 }
             }
             while (!Thread.currentThread().isInterrupted()) {
-                if(_isServer) {
+                if (_isServer) {
                     try {
                         socket = serverSocket.accept();
                         commThread comThread = new commThread(socket);
@@ -221,15 +221,12 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else
-                {
-                    if(_threadSpeaker.text != null)
-                    {
+                } else {
+                    if (_threadSpeaker.text_to_write != null) {
                         try {
-
                             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                            out.println(_threadSpeaker.text);
+
+                            out.println(_threadSpeaker.text_to_write);
 
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -237,36 +234,42 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                             e.printStackTrace();
                         }
                         finally {
-                            _threadSpeaker.text = null;
+                            _threadSpeaker.text_to_write = null;
                         }
                     }
                 }
             }
         }
+    }
 
-        class commThread implements Runnable {
-            private Socket _clientSocket;
-            private BufferedReader _input;
+    class commThread implements Runnable {
+        private Socket _clientSocket;
+        private BufferedReader _input;
 
-            public commThread(Socket clientSocket) {
-                _clientSocket = clientSocket;
-                try {
-                    _input = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
-                } catch (IOException e) {
+        public commThread(Socket clientSocket) {
+            _clientSocket = clientSocket;
+            try {
+                _input = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
+            } catch (IOException e) {
 
-                }
             }
+        }
 
-            @Override
-            public void run() {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        String read = _input.readLine();
-                        _appMainActivity.displayToast(read);
-                        //updateConversationHandler.post(new updateUIThread(read));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    _threadSpeaker.text_from_read = _input.readLine();
+                    new Thread() {
+                        public void run() {
+                            _threadSpeaker.updateConversationHandler.post(_appMainActivity.toastMe);
+                        }
+                    }.start();
+                    //_threadSpeaker.updateConversationHandler.post(new UpdateUIThread(read));
+                    //_appMainActivity.displayToast(read);
+                    //updateConversationHandler.post(new updateUIThread(read));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
