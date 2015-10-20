@@ -230,7 +230,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
                             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                             out.println(_threadSpeaker.text);
-                            
+
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
