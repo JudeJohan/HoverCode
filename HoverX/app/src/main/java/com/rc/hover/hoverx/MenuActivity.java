@@ -1,6 +1,7 @@
 package com.rc.hover.hoverx;
 
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,6 +49,12 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
 
     Handler m_handler;
     Runnable m_handlerTask ;
+    final Runnable toastMe = new Runnable() {
+        @Override
+        public void run() {
+            displayToast(_threadSpeaker.text_from_read);
+        }
+    };
 
     private final IntentFilter intentFilter = new IntentFilter();
 
@@ -77,17 +84,21 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
             @Override
             public void onClick(View v) {
                 if (connect.getText() == getResources().getString(R.string.connect_button)) {
-                    connect_status.setText(R.string.connection_status_con);
-                    connect.setText(R.string.disconnect_button);
-                    connect_status.setTextColor(getResources().getColor(R.color.LIME));
-                    drive.setEnabled(true);
-                    _threadSpeaker.text = "Hej min vän";
+
+                   onClickMenuConnect(null);
+
+                       connect_status.setText(R.string.connection_status_con);
+                       connect.setText(R.string.disconnect_button);
+                       connect_status.setTextColor(getResources().getColor(R.color.LIME));
+                       drive.setEnabled(true);
+                       _threadSpeaker.text_to_write = "Hej min vän";
+
                 } else if (connect.getText() == getResources().getString(R.string.disconnect_button)) {
                     connect_status.setText(R.string.connection_status);
                     connect.setText(R.string.connect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.RED));
                     drive.setEnabled(false);
-                    _threadSpeaker.text = "Hej då min vän";
+                    _threadSpeaker.text_to_write = "Hej då min vän";
                 }
             }
         });
@@ -97,11 +108,23 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                _selectedDevice = _wfdReceiver._wfdDevices[position];
-                onClickMenuConnect(null);
+                if(_selectedDevice == null) {
+                    view.setBackgroundColor(Color.parseColor("#00FF00"));
+                    _selectedDevice = _wfdReceiver._wfdDevices[position];
+                }
+                else
+                {
+                    _selectedDevice = null;
+                   for(int i = 0; i < _wfdReceiver._wfdDevices.length; i++)
+                   {
+                       _listView.getChildAt(i).setBackgroundColor(Color.parseColor("#00000000"));
+                   }
+                    view.setBackgroundColor(Color.parseColor("#00FF00"));
+                    _selectedDevice = _wfdReceiver._wfdDevices[position];
+                }
             }
         });
+
 
         _wfdReceiver = new WiFiDirectReceiver(_wfdManager, _wfdChannel, this);
         _wfdReceiver.registerReceiver();
