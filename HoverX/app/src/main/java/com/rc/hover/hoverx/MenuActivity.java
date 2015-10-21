@@ -27,6 +27,10 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.app.ListFragment;
 import android.widget.Toast;
 
+import com.rc.hover.hoverx.DataInfo.DataInfo;
+import com.rc.hover.hoverx.DataInfo.intDataInfo;
+import com.rc.hover.hoverx.DataInfo.stringDataInfo;
+
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +42,8 @@ import java.util.TimerTask;
 
 public class MenuActivity extends AppCompatActivity implements WifiP2pManager.ChannelListener {
 
-    public ThreadSpeaker _threadSpeaker = null;
+    HoverApp app;
+
     public ListView _listView = null;
     public List<String> _arrayList = null;
     public ArrayAdapter<String> _arrayAdapter = null;
@@ -46,15 +51,10 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
     private WifiP2pManager _wfdManager = null;
     private WifiP2pManager.Channel _wfdChannel = null;
     public WifiP2pDevice _selectedDevice = null;
+    public TextView _showDataInfo = null;
 
     Handler m_handler;
     Runnable m_handlerTask ;
-    final Runnable toastMe = new Runnable() {
-        @Override
-        public void run() {
-            displayToast(_threadSpeaker.text_from_read);
-        }
-    };
 
     private final IntentFilter intentFilter = new IntentFilter();
 
@@ -65,7 +65,8 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        _threadSpeaker = new ThreadSpeaker();
+        app = ((HoverApp)getApplication());
+        app.menuActivity = this;
         _arrayList = new ArrayList<String>();
         _wfdManager = (WifiP2pManager)getSystemService(WIFI_P2P_SERVICE);
         _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
@@ -79,26 +80,30 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         final Button drive = (Button) findViewById(R.id.drive_button);
         drive.setEnabled(false);
         final TextView connect_status = (TextView) findViewById(R.id.connect_text);
+        connect.setEnabled(false);
 
         connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (connect.getText() == getResources().getString(R.string.connect_button)) {
 
-                   onClickMenuConnect(null);
+                    onClickMenuConnect(null);
 
-                       connect_status.setText(R.string.connection_status_con);
-                       connect.setText(R.string.disconnect_button);
-                       connect_status.setTextColor(getResources().getColor(R.color.LIME));
-                       drive.setEnabled(true);
-                       _threadSpeaker.text_to_write = "Hej min vän";
+                    connect_status.setText(R.string.connection_status_con);
+                    connect.setText(R.string.disconnect_button);
+                    connect_status.setTextColor(getResources().getColor(R.color.LIME));
+                    drive.setEnabled(true);
+                    _listView.setVisibility(View.GONE);
+                    app.dataHolder.add(new stringDataInfo(DataInfo.ID.ToToast, DataInfo.TYPE.String, "Hej min vän"));
+                    //_threadSpeaker.text_to_write = "Hej min vän";
 
                 } else if (connect.getText() == getResources().getString(R.string.disconnect_button)) {
                     connect_status.setText(R.string.connection_status);
                     connect.setText(R.string.connect_button);
                     connect_status.setTextColor(getResources().getColor(R.color.RED));
                     drive.setEnabled(false);
-                    _threadSpeaker.text_to_write = "Hej då min vän";
+                    _listView.setVisibility(View.VISIBLE);
+                    app.dataHolder.add(new stringDataInfo(DataInfo.ID.ToToast, DataInfo.TYPE.String, "Hej min vän"));
                 }
             }
         });
@@ -108,17 +113,15 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         _listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(_selectedDevice == null) {
+                if (_selectedDevice == null) {
                     view.setBackgroundColor(Color.parseColor("#00FF00"));
                     _selectedDevice = _wfdReceiver._wfdDevices[position];
-                }
-                else
-                {
+                    connect.setEnabled(true);
+                } else {
                     _selectedDevice = null;
-                   for(int i = 0; i < _wfdReceiver._wfdDevices.length; i++)
-                   {
-                       _listView.getChildAt(i).setBackgroundColor(Color.parseColor("#00000000"));
-                   }
+                    for (int i = 0; i < _wfdReceiver._wfdDevices.length; i++) {
+                        _listView.getChildAt(i).setBackgroundColor(Color.parseColor("#00000000"));
+                    }
                     view.setBackgroundColor(Color.parseColor("#00FF00"));
                     _selectedDevice = _wfdReceiver._wfdDevices[position];
                 }
@@ -168,11 +171,6 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         return super.onOptionsItemSelected(item);
     }
 
-    public void displayToast(String s) {
-        Toast toast = Toast.makeText(this, s, Toast.LENGTH_LONG);
-        toast.show();
-    }
-
     public void onClickMenuDiscover(MenuItem item)
     {
         if(isWfdReceiverRegisteredAndFeatureEnabled())
@@ -193,11 +191,11 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
                 config.deviceAddress = theDevice.deviceAddress;
                 config.wps.setup = WpsInfo.PBC;
                 _wfdManager.connect(_wfdChannel, config, new ActionListenerHandler(this, "Connection"));
-                displayToast("Connected to: " + theDevice.deviceName);
+                app.displayToast("Connected to: " + theDevice.deviceName);
             }
             else
             {
-                displayToast("No device currently available");
+                app.displayToast("No device currently available");
             }
         }
 
@@ -215,22 +213,21 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
 
     private void showWfdReceiverNotRegisteredOrFeatureNotEnabledMessage()
     {
-        displayToast(_wfdReceiver == null ? "Wifi Broadcast Receiver Not Yet Registered" : "Wifi Direct Not Enabled On Phone");
+        app.displayToast(_wfdReceiver == null ? "Wifi Broadcast Receiver Not Yet Registered" : "Wifi Direct Not Enabled On Phone");
     }
 
     public void onChannelDisconnected(){
-        displayToast("Wifi Direct channel disconnected - Reinitializing");
+        app.displayToast("Wifi Direct channel disconnected - Reinitializing");
         reinitializeChannel();
     }
 
     private void reinitializeChannel(){
         _wfdChannel = _wfdManager.initialize(this, getMainLooper(), this);
         if(_wfdChannel != null){
-            displayToast("Initialization successful");
+            app.displayToast("Initialization successful");
         }
-        else
-        {
-            displayToast("Initialization failed");
+        else {
+            app.displayToast("Initialization failed");
         }
     }
 
@@ -242,6 +239,10 @@ public class MenuActivity extends AppCompatActivity implements WifiP2pManager.Ch
         }
     }
 
+    public void displayToast(String s) {
+        Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+        toast.show();
+    }
 
     @Override
     protected void onDestroy()

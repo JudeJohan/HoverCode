@@ -22,7 +22,7 @@ public class ActionListenerHandler implements WifiP2pManager.ActionListener {
 
     @Override
     public void onFailure(int reason) {
-        _mainActivity.displayToast(_actionDisplayText + " failed.");
+        _mainActivity.app.displayToast(_actionDisplayText + " failed.");
         Log.d("ALH", _actionDisplayText + " failed - error code " + reason);
     }
 }
