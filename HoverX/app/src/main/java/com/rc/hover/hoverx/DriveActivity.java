@@ -14,7 +14,7 @@ import android.widget.TextView;
 public class DriveActivity extends AppCompatActivity {
     VerticalSeekBar vsb1, vsb2 = null;
     TextView tx1, tx2 = null;
-    ThreadSpeaker infoData1 = null;
+    ThreadSpeaker infoData1, infoData2 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
