@@ -19,8 +19,12 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.rc.hover.hoverx.DataInfo.DataInfo;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -30,6 +34,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
@@ -38,25 +43,26 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         WifiP2pManager.PeerListListener,
         WifiP2pManager.ConnectionInfoListener {
 
+    HoverApp app;
     WifiP2pManager _wfdManager = null;
     WifiP2pManager.Channel _wfdChannel = null;
     MenuActivity _appMainActivity = null;
+    DriveActivity _appDriveActivity = null;
     private boolean _isWifiDirectEnabled = false;
     public WifiP2pDevice[] _wfdDevices = null;
 
     private IntentFilter _intentFilter = null;
     Thread networkThread = null;
-    public ThreadSpeaker _threadSpeaker = null;
 
     public WiFiDirectReceiver(){}
 
     public WiFiDirectReceiver(WifiP2pManager wfdManager, WifiP2pManager.Channel wfdChannel,
                               MenuActivity appMainActivity) {
         super();
-         _wfdManager = wfdManager;
-         _wfdChannel = wfdChannel;
-         _appMainActivity = appMainActivity;
-        _threadSpeaker = _appMainActivity._threadSpeaker;
+        _wfdManager = wfdManager;
+        _wfdChannel = wfdChannel;
+        _appMainActivity = appMainActivity;
+        app = _appMainActivity.app;
     }
 
     public void registerReceiver(){
@@ -117,7 +123,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
             _wfdManager.requestConnectionInfo(_wfdChannel, this);
         }
         else {
-            _appMainActivity.displayToast("Connection closed.");
+            //app.displayToast("Connection closed.");
         }
     }
 
@@ -143,7 +149,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         if(info.groupFormed) {
             if(info.isGroupOwner) {
-               if(networkThread != null) {
+                if(networkThread != null) {
                     networkThread.interrupt();
                 }
                 networkThread = new Thread(new nettThread(true, 10101, null));
@@ -222,11 +228,12 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                         e.printStackTrace();
                     }
                 } else {
-                    if (_threadSpeaker.text_to_write != null) {
+                    if (!app.dataHolder.isEmpty()) {
                         try {
-                            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-                            out.println(_threadSpeaker.text_to_write);
+                            out.write(app.dataHolder.get(0).toByteArray());
+                            app.dataHolder.remove(0);
 
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -234,7 +241,7 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                             e.printStackTrace();
                         }
                         finally {
-                            _threadSpeaker.text_to_write = null;
+
                         }
                     }
                 }
@@ -244,12 +251,12 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
     class commThread implements Runnable {
         private Socket _clientSocket;
-        private BufferedReader _input;
+        private DataInputStream _stream;
 
         public commThread(Socket clientSocket) {
             _clientSocket = clientSocket;
             try {
-                _input = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
+                _stream = new DataInputStream(_clientSocket.getInputStream());
             } catch (IOException e) {
 
             }
@@ -259,15 +266,35 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
         public void run() {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    _threadSpeaker.text_from_read = _input.readLine();
-                    new Thread() {
-                        public void run() {
-                            _threadSpeaker.updateConversationHandler.post(_appMainActivity.toastMe);
-                        }
-                    }.start();
-                    //_threadSpeaker.updateConversationHandler.post(new UpdateUIThread(read));
-                    //_appMainActivity.displayToast(read);
-                    //updateConversationHandler.post(new updateUIThread(read));
+                    byte id;
+                    byte type;
+                    int size;
+
+                    id = _stream.readByte();
+                    type = _stream.readByte();
+                    size = _stream.readInt();
+
+                    switch (id) {
+                        case DataInfo.ID.LeftDrive:
+                            break;
+                        case DataInfo.ID.RightDrive:
+                            break;
+                        case DataInfo.ID.ToToast:
+                            if(type == DataInfo.TYPE.String) {
+                                byte[] data = new byte[size - DataInfo.SIZE_OF_OVERHEAD];
+                                int result = _stream.read(data, 0, size - DataInfo.SIZE_OF_OVERHEAD);
+                                app.TempString = new String(data, "UTF-8");
+
+                                new Thread() {
+                                    public void run() {
+                                        app.displayToast(app.TempString);
+                                    }
+                                }.start();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

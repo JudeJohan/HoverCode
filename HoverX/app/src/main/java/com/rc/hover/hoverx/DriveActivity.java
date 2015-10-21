@@ -8,13 +8,17 @@ import android.view.ViewTreeObserver;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.rc.hover.hoverx.DataInfo.DataInfo;
+import com.rc.hover.hoverx.DataInfo.intDataInfo;
+
 /**
  * Created by Johannes on 2015-10-05.
  */
 public class DriveActivity extends AppCompatActivity {
     VerticalSeekBar vsb1, vsb2 = null;
     TextView tx1, tx2 = null;
-    ThreadSpeaker infoData1, infoData2 = null;
+    HoverApp app = ((HoverApp)getApplication());
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,17 +29,14 @@ public class DriveActivity extends AppCompatActivity {
         vsb2 = (VerticalSeekBar)findViewById(R.id.seekBar2);
         tx1 = (TextView)findViewById(R.id.textView);
         tx2 = (TextView)findViewById(R.id.textView2);
-        infoData1 = new ThreadSpeaker();
         tx1.setText("Current value: " + vsb1.getProgress());
         tx2.setText("Current value: " + vsb2.getProgress());
-        //vsb1.setProgressAndThumb(50);
-        //vsb2.setProgressAndThumb(50);
 
         vsb1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 tx1.setText("Current value: " + i);
-                infoData1.text_to_write = ("Current value: " + i);
+                app.dataHolder.add(new intDataInfo(DataInfo.ID.LeftDrive, DataInfo.TYPE.Integer, i));
             }
 
             @Override
@@ -53,6 +54,8 @@ public class DriveActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 tx2.setText("Current value: " + i);
+                app.dataHolder.add(new intDataInfo(DataInfo.ID.RightDrive, DataInfo.TYPE.Integer, i));
+
             }
 
             @Override
