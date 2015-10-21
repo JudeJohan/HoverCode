@@ -16,6 +16,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -276,20 +277,30 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
 
                     switch (id) {
                         case DataInfo.ID.LeftDrive:
+                            if(type == DataInfo.TYPE.Integer) {
+                                final int dataInt = _stream.readInt();
+                                Log.d("LeftDrive","" + dataInt);
+                            }
                             break;
                         case DataInfo.ID.RightDrive:
+                            if(type == DataInfo.TYPE.Integer) {
+                                final int dataInt = _stream.readInt();
+                                Log.d("RightDrive","" + dataInt);
+                            }
                             break;
                         case DataInfo.ID.ToToast:
                             if(type == DataInfo.TYPE.String) {
-                                byte[] data = new byte[size - DataInfo.SIZE_OF_OVERHEAD];
-                                int result = _stream.read(data, 0, size - DataInfo.SIZE_OF_OVERHEAD);
-                                app.TempString = new String(data, "UTF-8");
+                                byte[] dataByte = new byte[size - DataInfo.SIZE_OF_OVERHEAD];
+                                int result = _stream.read(dataByte, 0, size - DataInfo.SIZE_OF_OVERHEAD);
 
-                                new Thread() {
+                                final String temp = new String(dataByte, "UTF-8");
+
+                                _appMainActivity.runOnUiThread(new Runnable() {
+                                    @Override
                                     public void run() {
-                                        app.displayToast(app.TempString);
+                                        _appMainActivity.displayToast(temp);
                                     }
-                                }.start();
+                                });
                             }
                             break;
                         default:
