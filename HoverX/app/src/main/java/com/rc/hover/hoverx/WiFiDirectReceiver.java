@@ -225,7 +225,9 @@ public class WiFiDirectReceiver extends BroadcastReceiver implements
                     if (_threadSpeaker.text_to_write != null) {
                         try {
                             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+
                             out.println(_threadSpeaker.text_to_write);
+
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         } catch (IOException e) {

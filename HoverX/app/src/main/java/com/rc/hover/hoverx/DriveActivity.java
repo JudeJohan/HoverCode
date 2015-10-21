@@ -14,6 +14,7 @@ import android.widget.TextView;
 public class DriveActivity extends AppCompatActivity {
     VerticalSeekBar vsb1, vsb2 = null;
     TextView tx1, tx2 = null;
+    ThreadSpeaker infoData1, infoData2 = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +25,7 @@ public class DriveActivity extends AppCompatActivity {
         vsb2 = (VerticalSeekBar)findViewById(R.id.seekBar2);
         tx1 = (TextView)findViewById(R.id.textView);
         tx2 = (TextView)findViewById(R.id.textView2);
+        infoData1 = new ThreadSpeaker();
         tx1.setText("Current value: " + vsb1.getProgress());
         tx2.setText("Current value: " + vsb2.getProgress());
         //vsb1.setProgressAndThumb(50);
@@ -33,6 +35,7 @@ public class DriveActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 tx1.setText("Current value: " + i);
+                infoData1.text_to_write = ("Current value: " + i);
             }
 
             @Override
